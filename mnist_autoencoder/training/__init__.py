@@ -59,3 +59,4 @@ __all__ = [
     "plot_training_history",
     "plot_reconstruction_examples"
 ]
+
