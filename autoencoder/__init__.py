@@ -45,6 +45,23 @@ from .model_utils import (
     move_model_to_device
 )
 
+from .training_utils import (
+    EarlyStopping,
+    TrainingLogger,
+    ModelCheckpoint,
+    create_lr_scheduler,
+    format_time,
+    print_training_progress,
+    validate_training_config,
+    get_device
+)
+
+from .trainer import (
+    TrainingPipeline,
+    create_training_pipeline,
+    train_autoencoder
+)
+
 __version__ = "1.0.0"
 __all__ = [
     # Data loading functions
@@ -82,5 +99,20 @@ __all__ = [
     "get_model_summary",
     "print_model_summary",
     "validate_model_config",
-    "move_model_to_device"
+    "move_model_to_device",
+    
+    # Training utilities
+    "EarlyStopping",
+    "TrainingLogger",
+    "ModelCheckpoint",
+    "create_lr_scheduler",
+    "format_time",
+    "print_training_progress",
+    "validate_training_config",
+    "get_device",
+    
+    # Training pipeline
+    "TrainingPipeline",
+    "create_training_pipeline",
+    "train_autoencoder"
 ]
