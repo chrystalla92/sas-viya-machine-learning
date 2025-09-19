@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+import numpy as np
 
 from .autoencoder_model import AutoencoderMLP
 from .datasets import create_mnist_dataloaders
@@ -23,6 +24,7 @@ from .training_utils import (
     validate_training_config,
     get_device
 )
+from .visualization import plot_training_curves, VisualizationManager
 
 
 __all__ = [
@@ -428,13 +430,114 @@ class TrainingPipeline:
         
     def plot_training_curves(self, save_path: Optional[str] = None, show: bool = True) -> None:
         """
-        Plot training curves.
+        Plot training curves using the visualization system.
         
         Args:
             save_path (Optional[str]): Path to save the plot
             show (bool): Whether to display the plot
         """
-        self.logger.plot_loss_curves(save_path, show)
+        logs = self.logger.logs
+        if not logs['epochs']:
+            print("No training data to plot")
+            return
+            
+        plot_training_curves(
+            train_losses=logs['train_losses'],
+            val_losses=logs['val_losses'], 
+            epochs=logs['epochs'],
+            learning_rates=logs['learning_rates'],
+            save_path=save_path,
+            show=show
+        )
+    
+    def create_visualization_report(self, 
+                                   test_loader: DataLoader,
+                                   n_samples: int = 100,
+                                   save_dir: str = "./visualizations",
+                                   report_name: Optional[str] = None,
+                                   show_plots: bool = False) -> Dict[str, str]:
+        """
+        Create a comprehensive visualization report after training.
+        
+        Args:
+            test_loader (DataLoader): Test data for visualization
+            n_samples (int): Number of samples to use for visualization
+            save_dir (str): Directory to save visualizations
+            report_name (Optional[str]): Name for the report (auto-generated if None)
+            show_plots (bool): Whether to display plots
+            
+        Returns:
+            Dict[str, str]: Mapping of plot types to saved paths
+        """
+        if not self.training_complete:
+            print("Warning: Training not completed. Results may be preliminary.")
+        
+        print("Generating visualization report...")
+        
+        # Generate report name if not provided
+        if report_name is None:
+            import datetime
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            report_name = f"autoencoder_report_{timestamp}"
+        
+        # Get data for visualization
+        self.model.eval()
+        originals = []
+        reconstructions = []
+        latents = []
+        labels = []
+        
+        with torch.no_grad():
+            samples_collected = 0
+            for batch_data in test_loader:
+                if samples_collected >= n_samples:
+                    break
+                
+                # Handle different batch formats
+                if isinstance(batch_data, tuple):
+                    inputs, batch_labels = batch_data[0].to(self.device), batch_data[1]
+                    labels.extend(batch_labels.numpy())
+                else:
+                    inputs = batch_data.to(self.device)
+                    batch_labels = None
+                
+                # Forward pass
+                recon, latent = self.model(inputs, return_latent=True)
+                
+                # Collect data
+                batch_size = min(inputs.size(0), n_samples - samples_collected)
+                originals.extend(inputs[:batch_size].cpu().numpy())
+                reconstructions.extend(recon[:batch_size].cpu().numpy())
+                latents.extend(latent[:batch_size].cpu().numpy())
+                
+                samples_collected += batch_size
+        
+        # Convert to numpy arrays
+        originals = np.array(originals)
+        reconstructions = np.array(reconstructions)
+        latent_representations = np.array(latents)
+        labels_array = np.array(labels) if labels else None
+        
+        # Get training logs
+        logs = self.logger.logs
+        
+        # Create comprehensive report
+        manager = VisualizationManager(output_dir=save_dir)
+        saved_plots = manager.create_comprehensive_report(
+            originals=originals,
+            reconstructions=reconstructions,
+            latent_representations=latent_representations,
+            train_losses=logs['train_losses'],
+            val_losses=logs['val_losses'],
+            labels=labels_array,
+            epochs=logs['epochs'],
+            learning_rates=logs['learning_rates'],
+            report_name=report_name,
+            show_plots=show_plots
+        )
+        
+        print(f"Visualization report completed: {len(saved_plots)} plots generated")
+        return saved_plots
         
     def get_model(self) -> AutoencoderMLP:
         """Get the trained model."""
