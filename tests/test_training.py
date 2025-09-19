@@ -276,7 +276,7 @@ class TestTrainer:
         assert trainer.metrics.epochs_without_improvement == 1
         
         should_stop = trainer.check_early_stopping(0.7)
-        assert not should_stop
+        assert should_stop  # Should trigger early stopping after patience=2
         assert trainer.metrics.epochs_without_improvement == 2
         
         should_stop = trainer.check_early_stopping(0.8)
@@ -517,7 +517,7 @@ class TestEdgeCases:
     def test_single_sample_training(self, sample_model, temp_dir):
         """Test training with single sample."""
         # Create dataset with single sample
-        single_data = TensorDataset(torch.randn(1, 784), torch.tensor([0]))
+        single_data = TensorDataset(torch.rand(1, 784), torch.tensor([0]))
         single_loader = DataLoader(single_data, batch_size=1)
         
         config = TrainingConfig(
@@ -541,14 +541,23 @@ class TestEdgeCases:
             verbose=False
         )
         trainer = Trainer(sample_model, config)
-        
-        # Simulate interruption
-        trainer._should_stop = True
-        
+
+        # Mock the train_epoch method to simulate interruption after a few epochs
+        original_train_epoch = trainer.train_epoch
+        call_count = [0]
+
+        def mock_train_epoch(*args, **kwargs):
+            call_count[0] += 1
+            if call_count[0] >= 3:  # Interrupt after 3 epochs
+                trainer._should_stop = True
+            return original_train_epoch(*args, **kwargs)
+
+        trainer.train_epoch = mock_train_epoch
+
         results = trainer.train(sample_data_loader)
-        
-        # Should handle interruption gracefully
-        assert results["total_epochs"] < 10  # Should stop early
+
+        # Should handle interruption gracefully - stopped at epoch 3
+        assert results["total_epochs"] <= 3  # Should stop early
     
     def test_checkpoint_loading_errors(self, sample_model, temp_dir):
         """Test checkpoint loading error handling."""

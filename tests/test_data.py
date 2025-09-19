@@ -144,27 +144,31 @@ class TestIDXFileReader:
                 os.unlink(f.name)
 
 
-class TestMNISTDataset:
-    """Test MNIST dataset functionality."""
-    
-    @pytest.fixture
-    def mock_torchvision_mnist(self):
+@pytest.fixture
+def mock_torchvision_mnist():
         """Mock torchvision MNIST dataset."""
-        with patch('torchvision.datasets.MNIST') as mock_mnist:
-            # Create fake data
-            fake_data = torch.randint(0, 256, (100, 1, 28, 28), dtype=torch.uint8)
+        with patch('mnist_autoencoder.data.dataset.torchvision.datasets.MNIST') as mock_mnist:
+            # Create fake data in [0,1] range
+            fake_data = torch.rand(100, 1, 28, 28)
             fake_targets = torch.randint(0, 10, (100,), dtype=torch.long)
-            
-            # Mock dataset
+
+            # Create a proper mock dataset that behaves like MNIST
             mock_dataset = MagicMock()
             mock_dataset.__len__ = MagicMock(return_value=100)
+            mock_dataset.__getitem__ = MagicMock(side_effect=lambda i: (fake_data[i], fake_targets[i]))
             mock_mnist.return_value = mock_dataset
-            
-            # Mock DataLoader behavior
-            with patch('torch.utils.data.DataLoader') as mock_dataloader:
-                mock_dataloader.return_value.__iter__ = lambda: iter([(fake_data, fake_targets)])
+
+            # Mock DataLoader to return the data properly
+            with patch('mnist_autoencoder.data.dataset.DataLoader') as mock_dataloader:
+                mock_iter = MagicMock()
+                mock_iter.__next__ = MagicMock(return_value=(fake_data, fake_targets))
+                mock_dataloader.return_value.__iter__ = MagicMock(return_value=mock_iter)
                 yield mock_mnist, fake_data, fake_targets
-    
+
+
+class TestMNISTDataset:
+    """Test MNIST dataset functionality."""
+
     def test_mnist_dataset_torchvision(self, mock_torchvision_mnist):
         """Test MNIST dataset with torchvision backend."""
         mock_mnist, fake_data, fake_targets = mock_torchvision_mnist
@@ -322,7 +326,7 @@ class TestMNISTDataLoader:
             mock_dataset = MagicMock()
             mock_dataset.__len__ = MagicMock(return_value=100)
             mock_dataset.get_cached_data = MagicMock(return_value=(
-                torch.randn(100, 784), torch.randint(0, 10, (100,))
+                torch.rand(100, 784), torch.randint(0, 10, (100,))
             ))
             mock_cls.return_value = mock_dataset
             yield mock_dataset

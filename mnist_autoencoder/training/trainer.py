@@ -574,7 +574,8 @@ class Trainer:
             raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
         
         try:
-            checkpoint = torch.load(checkpoint_path, map_location=self.device)
+            # Use weights_only=False for compatibility with custom classes
+            checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
             
             # Load model state
             self.model.load_state_dict(checkpoint["model_state_dict"])

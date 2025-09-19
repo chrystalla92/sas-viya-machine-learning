@@ -116,7 +116,7 @@ class ModelCheckpoint:
         
         try:
             # Load checkpoint
-            checkpoint = torch.load(filepath, map_location=device)
+            checkpoint = torch.load(filepath, map_location=device, weights_only=False)
             
             # Extract model information
             model_info = checkpoint["model_info"]

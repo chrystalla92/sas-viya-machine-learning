@@ -16,7 +16,7 @@ def sample_mnist_data():
         tuple: (data, labels) where data is (N, 28, 28) and labels is (N,)
     """
     batch_size = 10
-    data = torch.randn(batch_size, 28, 28)
+    data = torch.rand(batch_size, 28, 28)
     labels = torch.randint(0, 10, (batch_size,))
     return data, labels
 
@@ -30,9 +30,7 @@ def sample_batch():
         torch.Tensor: Normalized batch data (N, 1, 28, 28)
     """
     batch_size = 4
-    data = torch.randn(batch_size, 1, 28, 28)
-    # Normalize to [0, 1] range like MNIST
-    data = (data - data.min()) / (data.max() - data.min())
+    data = torch.rand(batch_size, 1, 28, 28)
     return data
 
 
