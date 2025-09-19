@@ -62,6 +62,35 @@ from .trainer import (
     train_autoencoder
 )
 
+from .metrics import (
+    ReconstructionMetrics,
+    LatentSpaceAnalyzer,
+    calculate_reconstruction_errors,
+    calculate_per_sample_errors,
+    calculate_aggregate_errors,
+    compute_latent_statistics,
+    prepare_latent_visualization
+)
+
+from .model_io import (
+    ModelSaver,
+    ModelLoader,
+    CheckpointManager,
+    SASOutputFormatter,
+    save_model_state,
+    load_model_state,
+    convert_checkpoint_to_standalone,
+    export_model_summary,
+    create_sas_compatible_outputs
+)
+
+from .evaluator import (
+    ModelEvaluator,
+    BatchInferenceProcessor,
+    PerformanceBenchmark,
+    ModelComparator
+)
+
 __version__ = "1.0.0"
 __all__ = [
     # Data loading functions
@@ -114,5 +143,31 @@ __all__ = [
     # Training pipeline
     "TrainingPipeline",
     "create_training_pipeline",
-    "train_autoencoder"
+    "train_autoencoder",
+    
+    # Evaluation metrics
+    "ReconstructionMetrics",
+    "LatentSpaceAnalyzer",
+    "calculate_reconstruction_errors",
+    "calculate_per_sample_errors",
+    "calculate_aggregate_errors",
+    "compute_latent_statistics",
+    "prepare_latent_visualization",
+    
+    # Model I/O utilities
+    "ModelSaver",
+    "ModelLoader",
+    "CheckpointManager",
+    "SASOutputFormatter",
+    "save_model_state",
+    "load_model_state",
+    "convert_checkpoint_to_standalone",
+    "export_model_summary",
+    "create_sas_compatible_outputs",
+    
+    # Evaluation and inference
+    "ModelEvaluator",
+    "BatchInferenceProcessor",
+    "PerformanceBenchmark",
+    "ModelComparator"
 ]
