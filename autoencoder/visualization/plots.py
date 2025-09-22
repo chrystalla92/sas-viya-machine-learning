@@ -22,13 +22,25 @@ import warnings
 # Import utilities
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.plot_utils import (
-    create_figure_and_axes, format_axis, save_figure, tensor_to_numpy,
-    normalize_for_display, format_mnist_image, get_mnist_colormap,
-    setup_subplot_layout, get_figure_size_for_grid, apply_tight_layout,
-    COLORS, PlotManager
-)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+try:
+    from utils.plot_utils import (
+        create_figure_and_axes, format_axis, save_figure, tensor_to_numpy,
+        normalize_for_display, format_mnist_image, get_mnist_colormap,
+        setup_subplot_layout, get_figure_size_for_grid, apply_tight_layout,
+        COLORS, PlotManager
+    )
+except ImportError:
+    # Fallback with relative import
+    from ..utils.plot_utils import (
+        create_figure_and_axes, format_axis, save_figure, tensor_to_numpy,
+        normalize_for_display, format_mnist_image, get_mnist_colormap,
+        setup_subplot_layout, get_figure_size_for_grid, apply_tight_layout,
+        COLORS, PlotManager
+    )
 
 
 def plot_mnist_grid(images: Union[torch.Tensor, np.ndarray], 
@@ -84,7 +96,14 @@ def plot_mnist_grid(images: Union[torch.Tensor, np.ndarray],
     for i in range(n_images):
         row = i // ncols
         col = i % ncols
-        ax = axes[row * ncols + col] if nrows * ncols > 1 else axes[0]
+        
+        # Handle different axes array structures
+        if nrows == 1 and ncols == 1:
+            ax = axes[0] if isinstance(axes, np.ndarray) else axes
+        elif nrows == 1 or ncols == 1:
+            ax = axes[i]
+        else:
+            ax = axes[row, col]
         
         # Format image for display
         image = format_mnist_image(images[i])
@@ -107,7 +126,14 @@ def plot_mnist_grid(images: Union[torch.Tensor, np.ndarray],
     for i in range(n_images, nrows * ncols):
         row = i // ncols
         col = i % ncols
-        ax = axes[row * ncols + col] if nrows * ncols > 1 else axes[0]
+        
+        # Handle different axes array structures  
+        if nrows == 1 and ncols == 1:
+            ax = axes[0] if isinstance(axes, np.ndarray) else axes
+        elif nrows == 1 or ncols == 1:
+            ax = axes[i]
+        else:
+            ax = axes[row, col]
         ax.set_visible(False)
     
     # Adjust layout
@@ -168,8 +194,15 @@ def plot_reconstruction_comparison(original_images: Union[torch.Tensor, np.ndarr
     
     # Plot comparisons
     for i in range(n_samples):
+        # Handle axes indexing properly
+        if n_samples == 1:
+            orig_ax = axes[0]
+            recon_ax = axes[1]
+        else:
+            orig_ax = axes[0, i]
+            recon_ax = axes[1, i]
+            
         # Original image (top row)
-        orig_ax = axes[0, i] if n_samples > 1 else axes[0]
         orig_image = format_mnist_image(original_images[i])
         orig_ax.imshow(orig_image, cmap=get_mnist_colormap(), interpolation='none')
         
@@ -183,7 +216,6 @@ def plot_reconstruction_comparison(original_images: Union[torch.Tensor, np.ndarr
             orig_ax.set_title(f"Label: {int(labels[i])}", fontsize=10, pad=8)
         
         # Reconstructed image (bottom row)  
-        recon_ax = axes[1, i] if n_samples > 1 else axes[1]
         recon_image = format_mnist_image(reconstructed_images[i])
         recon_ax.imshow(recon_image, cmap=get_mnist_colormap(), interpolation='none')
         
