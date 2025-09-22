@@ -213,7 +213,7 @@ class CheckpointManager:
         
         try:
             # Load checkpoint data
-            checkpoint_data = torch.load(checkpoint_path, map_location='cpu')
+            checkpoint_data = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
             
             # Extract architecture info
             arch_info = checkpoint_data.get('architecture', {})
