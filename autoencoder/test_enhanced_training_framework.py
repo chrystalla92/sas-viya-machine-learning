@@ -23,6 +23,10 @@ from utils.checkpointing import CheckpointManager
 from utils.metrics import TrainingMetrics, analyze_training_convergence
 from data_utils import train_validation_split
 
+# Global variables to store test results
+test_trainer = None
+test_metrics = None
+
 def create_test_data(n_samples: int = 1000, seed: int = 23451) -> tuple:
     """Create test data that mimics MNIST structure."""
     np.random.seed(seed)
@@ -69,7 +73,6 @@ def test_training_configuration():
     assert config.batch_size is None, "Should use full batch training like SAS"
     
     print("✓ Training configuration matches SAS requirements")
-    return True
 
 def test_model_architecture():
     """Test model architecture matches SAS specification."""
@@ -89,7 +92,6 @@ def test_model_architecture():
     assert output.shape == test_input.shape, "Output should match input shape"
     
     print("✓ Model architecture matches SAS specification")
-    return True
 
 def test_lbfgs_training():
     """Test L-BFGS training with convergence tracking."""
@@ -135,7 +137,9 @@ def test_lbfgs_training():
     print(f"✓ Final loss: {metrics.train_losses[-1]:.8f}")
     print(f"✓ Best loss: {metrics.best_loss:.8f} at epoch {metrics.best_epoch}")
     
-    return trainer, metrics
+    # Store results in global variables for use by other functions
+    global test_trainer, test_metrics
+    test_trainer, test_metrics = trainer, metrics
 
 def test_checkpointing():
     """Test checkpoint saving and loading."""
@@ -170,7 +174,6 @@ def test_checkpointing():
     assert start_epoch == test_epoch + 1, "Should resume from next epoch"
     
     print("✓ Checkpointing works correctly")
-    return True
 
 def test_evaluation_metrics():
     """Test evaluation and metrics computation."""
@@ -197,8 +200,6 @@ def test_evaluation_metrics():
     print("✓ Evaluation metrics computed correctly")
     print(f"✓ MSE Loss: {results['mse_loss']:.6f}")
     print(f"✓ Pixel Accuracy: {results['pixel_accuracy']:.2f}%")
-    
-    return True
 
 def test_convergence_analysis():
     """Test convergence analysis functionality."""
@@ -222,8 +223,6 @@ def test_convergence_analysis():
     print("✓ Convergence analysis working correctly")
     print(f"✓ Converged: {convergence_info['converged']}")
     print(f"✓ Loss trend: {convergence_info['loss_trend']:.6f}")
-    
-    return True
 
 def test_sas_compatibility():
     """Test specific SAS compatibility features."""
@@ -257,11 +256,10 @@ def test_sas_compatibility():
     
     print("✓ SAS compatibility verified")
     print(f"✓ Deterministic behavior confirmed (difference: {difference:.2e})")
-    
-    return True
 
 def run_comprehensive_test():
     """Run all tests and verify success criteria."""
+    global test_trainer, test_metrics
     print("=" * 60)
     print("COMPREHENSIVE TRAINING FRAMEWORK TEST")
     print("=" * 60)
@@ -270,39 +268,76 @@ def run_comprehensive_test():
     
     try:
         # Run all tests
-        test_results['config'] = test_training_configuration()
-        test_results['architecture'] = test_model_architecture()
-        test_results['checkpointing'] = test_checkpointing()
-        test_results['evaluation'] = test_evaluation_metrics()
-        test_results['convergence'] = test_convergence_analysis()
-        test_results['sas_compatibility'] = test_sas_compatibility()
+        try:
+            test_training_configuration()
+            test_results['config'] = True
+        except AssertionError:
+            test_results['config'] = False
+            
+        try:
+            test_model_architecture()
+            test_results['architecture'] = True
+        except AssertionError:
+            test_results['architecture'] = False
+            
+        try:
+            test_checkpointing()
+            test_results['checkpointing'] = True
+        except AssertionError:
+            test_results['checkpointing'] = False
+            
+        try:
+            test_evaluation_metrics()
+            test_results['evaluation'] = True
+        except AssertionError:
+            test_results['evaluation'] = False
+            
+        try:
+            test_convergence_analysis()
+            test_results['convergence'] = True
+        except AssertionError:
+            test_results['convergence'] = False
+            
+        try:
+            test_sas_compatibility()
+            test_results['sas_compatibility'] = True
+        except AssertionError:
+            test_results['sas_compatibility'] = False
         
         # Run full training test
         print("\n" + "=" * 40)
-        trainer, metrics = test_lbfgs_training()
-        test_results['training'] = True
+        try:
+            test_lbfgs_training()
+            test_results['training'] = True
+            trainer, metrics = test_trainer, test_metrics
+        except AssertionError:
+            test_results['training'] = False
+            trainer, metrics = None, None
         
-        # Analyze final results
-        print("\n=== Final Training Analysis ===")
-        summary = metrics.get_summary()
-        for key, value in summary.items():
-            print(f"{key}: {value}")
-        
-        # Success criteria verification
-        success_criteria = {
-            'training_completed': len(metrics.train_losses) > 0,
-            'loss_decreased': metrics.train_losses[-1] < metrics.train_losses[0],
-            'convergence_tracked': hasattr(trainer, 'gradient_norms'),
-            'checkpoints_saved': os.path.exists('./test_checkpoints'),
-            'metrics_saved': os.path.exists('./test_logs/training_metrics.json')
-        }
-        
-        print("\n=== Success Criteria Verification ===")
-        all_passed = True
-        for criterion, passed in success_criteria.items():
-            status = "✓ PASS" if passed else "✗ FAIL"
-            print(f"{criterion}: {status}")
-            all_passed = all_passed and passed
+        if trainer and metrics:
+            # Analyze final results
+            print("\n=== Final Training Analysis ===")
+            summary = metrics.get_summary()
+            for key, value in summary.items():
+                print(f"{key}: {value}")
+            
+            # Success criteria verification
+            success_criteria = {
+                'training_completed': len(metrics.train_losses) > 0,
+                'loss_decreased': metrics.train_losses[-1] < metrics.train_losses[0],
+                'convergence_tracked': hasattr(trainer, 'gradient_norms'),
+                'checkpoints_saved': os.path.exists('./test_checkpoints'),
+                'metrics_saved': os.path.exists('./test_logs/training_metrics.json')
+            }
+            
+            print("\n=== Success Criteria Verification ===")
+            all_passed = True
+            for criterion, passed in success_criteria.items():
+                status = "✓ PASS" if passed else "✗ FAIL"
+                print(f"{criterion}: {status}")
+                all_passed = all_passed and passed
+        else:
+            all_passed = False
         
         # Overall result
         print("\n" + "=" * 60)

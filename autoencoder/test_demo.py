@@ -31,10 +31,9 @@ def test_imports():
         from data_utils import train_validation_split
         print("  ✓ data_utils")
         
-        return True
     except Exception as e:
         print(f"  ✗ Import error: {e}")
-        return False
+        assert False, f"Import error: {e}"
 
 def test_synthetic_data():
     """Test synthetic data generation."""
@@ -57,11 +56,10 @@ def test_synthetic_data():
         assert labels.shape == (100,), f"Labels shape wrong: {labels.shape}"
         
         print("  ✓ Pattern generation works")
-        return True
     except Exception as e:
         print(f"  ✗ Synthetic data error: {e}")
         traceback.print_exc()
-        return False
+        assert False, f"Synthetic data error: {e}"
 
 def test_model_creation():
     """Test autoencoder model creation."""
@@ -84,11 +82,10 @@ def test_model_creation():
         assert info['hidden_dim'] == 64
         
         print("  ✓ Model creation works")
-        return True
     except Exception as e:
         print(f"  ✗ Model creation error: {e}")
         traceback.print_exc()
-        return False
+        assert False, f"Model creation error: {e}"
 
 def test_data_utils():
     """Test data utilities."""
@@ -110,11 +107,10 @@ def test_data_utils():
         assert len(val_imgs) == 20, f"Val size wrong: {len(val_imgs)}"
         
         print("  ✓ Data utilities work")
-        return True
     except Exception as e:
         print(f"  ✗ Data utilities error: {e}")
         traceback.print_exc()
-        return False
+        assert False, f"Data utilities error: {e}"
 
 def test_minimal_training():
     """Test minimal training loop."""
@@ -155,11 +151,10 @@ def test_minimal_training():
         assert final_loss < initial_loss, f"Loss didn't decrease: {initial_loss} -> {final_loss}"
         
         print(f"  ✓ Minimal training works (loss: {initial_loss:.6f} -> {final_loss:.6f})")
-        return True
     except Exception as e:
         print(f"  ✗ Minimal training error: {e}")
         traceback.print_exc()
-        return False
+        assert False, f"Minimal training error: {e}"
 
 def main():
     """Run all tests."""
@@ -177,8 +172,13 @@ def main():
     
     results = []
     for test_name, test_func in tests:
-        success = test_func()
-        results.append((test_name, success))
+        try:
+            test_func()
+            results.append((test_name, True))
+        except AssertionError:
+            results.append((test_name, False))
+        except Exception:
+            results.append((test_name, False))
     
     print("\n" + "="*50)
     print("TEST RESULTS")

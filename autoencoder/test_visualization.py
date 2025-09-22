@@ -26,7 +26,7 @@ def test_imports():
         print("✓ Main visualization package imported")
     except ImportError as e:
         print(f"✗ Failed to import visualization package: {e}")
-        return False
+        assert False, f"Failed to import visualization package: {e}"
     
     try:
         from visualization import check_available_modules
@@ -36,10 +36,10 @@ def test_imports():
             print("✓ All visualization modules available")
         else:
             print("⚠ Some visualization modules not available")
-        return all_available
+        assert all_available, "Some visualization modules not available"
     except Exception as e:
         print(f"✗ Error checking module availability: {e}")
-        return False
+        assert False, f"Error checking module availability: {e}"
 
 @pytest.fixture
 def test_data():
@@ -114,11 +114,9 @@ def test_plots_module(test_data):
         plt.close(fig2)
         print("✓ plot_reconstruction_comparison works")
         
-        return True
-        
     except Exception as e:
         print(f"✗ plots module test failed: {e}")
-        return False
+        assert False, f"plots module test failed: {e}"
 
 def test_training_plots_module(test_data):
     """Test the training_plots module."""
@@ -143,11 +141,9 @@ def test_training_plots_module(test_data):
         plt.close(fig2)
         print("✓ plot_loss_convergence works")
         
-        return True
-        
     except Exception as e:
         print(f"✗ training_plots module test failed: {e}")
-        return False
+        assert False, f"training_plots module test failed: {e}"
 
 def test_analysis_module(test_data):
     """Test the analysis module.""" 
@@ -169,11 +165,9 @@ def test_analysis_module(test_data):
         plt.close(fig2)
         print("✓ plot_weight_distributions works")
         
-        return True
-        
     except Exception as e:
         print(f"✗ analysis module test failed: {e}")
-        return False
+        assert False, f"analysis module test failed: {e}"
 
 def test_utils_module():
     """Test the utils module."""
@@ -190,11 +184,9 @@ def test_utils_module():
         primary_color = COLORS['primary']
         print(f"✓ Color scheme accessible (primary: {primary_color})")
         
-        return True
-        
     except Exception as e:
         print(f"✗ utils module test failed: {e}")
-        return False
+        assert False, f"utils module test failed: {e}"
 
 def main():
     """Run all tests."""
@@ -202,45 +194,53 @@ def main():
     print("=" * 50)
     
     # Test imports
-    imports_ok = test_imports()
-    if not imports_ok:
+    try:
+        test_imports()
+        imports_ok = True
+    except AssertionError:
         print("\n✗ Import tests failed. Cannot continue.")
+        imports_ok = False
+    
+    if not imports_ok:
         return False
     
     # Create test data
     try:
-        test_data = create_test_data()
+        test_data_fixture = test_data()  # Call the fixture function
+        test_data_dict = test_data_fixture
     except Exception as e:
         print(f"✗ Failed to create test data: {e}")
         return False
     
     # Run module tests
     tests = [
-        test_utils_module,
-        lambda: test_plots_module(test_data),
-        lambda: test_training_plots_module(test_data),
-        lambda: test_analysis_module(test_data)
+        ("Utils", test_utils_module),
+        ("Plots", lambda: test_plots_module(test_data_dict)),
+        ("Training Plots", lambda: test_training_plots_module(test_data_dict)),
+        ("Analysis", lambda: test_analysis_module(test_data_dict))
     ]
     
     results = []
-    for test in tests:
+    for test_name, test_func in tests:
         try:
-            result = test()
-            results.append(result)
+            test_func()
+            results.append((test_name, True))
+        except AssertionError as e:
+            print(f"✗ {test_name} test failed: {e}")
+            results.append((test_name, False))
         except Exception as e:
-            print(f"✗ Test error: {e}")
-            results.append(False)
+            print(f"✗ {test_name} test error: {e}")
+            results.append((test_name, False))
     
     # Summary
     print("\n" + "=" * 50)
     print("TEST SUMMARY")
     print("=" * 50)
     
-    passed = sum(results)
+    passed = sum(1 for _, result in results if result)
     total = len(results)
     
-    test_names = ["Utils", "Plots", "Training Plots", "Analysis"]
-    for i, (name, result) in enumerate(zip(test_names, results)):
+    for name, result in results:
         status = "✓ PASS" if result else "✗ FAIL"
         print(f"{name:<15} {status}")
     
