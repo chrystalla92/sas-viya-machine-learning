@@ -15,6 +15,7 @@ Usage:
 
 import argparse
 import os
+import sys
 import time
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,10 +24,23 @@ import torch.nn as nn
 import torch.optim as optim
 from typing import Tuple, Dict, List, Optional
 
+# Add the directory containing this script to Python path for imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 # Import our modules
-from synthetic_demo_data import SyntheticPatternGenerator, visualize_samples
-from model import MNISTAutoencoder
-from data_utils import train_validation_split
+try:
+    from synthetic_demo_data import SyntheticPatternGenerator, visualize_samples
+    from model import MNISTAutoencoder
+    from data_utils import train_validation_split
+except ImportError as e:
+    print(f"❌ Import error: {e}")
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"Script directory: {current_dir}")
+    print(f"Python path: {sys.path}")
+    print("\nMake sure to run this script from the autoencoder directory or ensure all dependencies are accessible.")
+    sys.exit(1)
 
 
 class SimpleAutoencoderDemo:
@@ -358,8 +372,6 @@ def main():
     return 0
 
 
-def run_demo(args):
-    """Run the actual demonstration."""
 def run_demo(args):
     """Run the actual demonstration."""
     print("="*60)
