@@ -212,8 +212,9 @@ class CheckpointManager:
             raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
         
         try:
-            # Load checkpoint data
-            checkpoint_data = torch.load(checkpoint_path, map_location='cpu')
+            # Load checkpoint data with weights_only=False for backward compatibility
+            # This is safe since we're loading our own checkpoint files
+            checkpoint_data = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
             
             # Extract architecture info
             arch_info = checkpoint_data.get('architecture', {})

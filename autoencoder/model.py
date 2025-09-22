@@ -202,7 +202,7 @@ class MNISTAutoencoder(nn.Module):
         Returns:
             Tuple of (model, state_info) where state_info contains epoch, loss, etc.
         """
-        checkpoint = torch.load(filepath, map_location=map_location)
+        checkpoint = torch.load(filepath, map_location=map_location, weights_only=False)
         
         # Extract architecture info
         arch_info = checkpoint.get('architecture', {})

@@ -24,6 +24,32 @@ from datetime import datetime
 import warnings
 
 
+def convert_numpy_types(obj):
+    """
+    Convert numpy types to native Python types for JSON serialization.
+    
+    Args:
+        obj: Object that may contain numpy types
+        
+    Returns:
+        Object with numpy types converted to native Python types
+    """
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(item) for item in obj]
+    else:
+        return obj
+
+
 class TrainingMetrics:
     """Class to track and manage training metrics."""
     
@@ -169,6 +195,9 @@ class TrainingMetrics:
             'convergence_analysis': self.compute_convergence_metrics(),
             'timestamp': datetime.now().isoformat()
         }
+        
+        # Convert numpy types to native Python types for JSON serialization
+        metrics_data = convert_numpy_types(metrics_data)
         
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         with open(filepath, 'w') as f:
@@ -431,6 +460,9 @@ class MetricsLogger:
             'timestamp': datetime.now().isoformat(),
             'log_directory': self.log_dir
         }
+        
+        # Convert numpy types to native Python types for JSON serialization
+        all_metrics = convert_numpy_types(all_metrics)
         
         with open(filepath, 'w') as f:
             json.dump(all_metrics, f, indent=2)
