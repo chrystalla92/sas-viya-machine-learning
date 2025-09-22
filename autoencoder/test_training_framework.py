@@ -54,7 +54,7 @@ class IntegrationTester:
             shutil.rmtree(self.temp_dir)
             print(f"Cleaned up temporary directory: {self.temp_dir}")
     
-    def test_model_architecture(self) -> Dict[str, Any]:
+    def check_model_architecture(self) -> Dict[str, Any]:
         """Test model architecture matches SAS specifications."""
         print("=== Testing Model Architecture ===")
         
@@ -100,7 +100,7 @@ class IntegrationTester:
         
         return results
     
-    def test_training_integration(self) -> Dict[str, Any]:
+    def check_training_integration(self) -> Dict[str, Any]:
         """Test training integration with mock data."""
         print("=== Testing Training Integration ===")
         
@@ -158,7 +158,7 @@ class IntegrationTester:
         
         return results
     
-    def test_checkpointing_system(self) -> Dict[str, Any]:
+    def check_checkpointing_system(self) -> Dict[str, Any]:
         """Test checkpointing functionality."""
         print("=== Testing Checkpointing System ===")
         
@@ -212,7 +212,7 @@ class IntegrationTester:
         
         return results
     
-    def test_evaluation_system(self) -> Dict[str, Any]:
+    def check_evaluation_system(self) -> Dict[str, Any]:
         """Test evaluation functionality."""
         print("=== Testing Evaluation System ===")
         
@@ -258,7 +258,7 @@ class IntegrationTester:
         
         return results
     
-    def test_data_integration(self) -> Dict[str, Any]:
+    def check_data_integration(self) -> Dict[str, Any]:
         """Test integration with existing data processing modules."""
         print("=== Testing Data Processing Integration ===")
         
@@ -305,7 +305,7 @@ class IntegrationTester:
         
         return results
     
-    def test_convergence_behavior(self) -> Dict[str, Any]:
+    def check_convergence_behavior(self) -> Dict[str, Any]:
         """Test that training shows proper convergence behavior."""
         print("=== Testing Convergence Behavior ===")
         
@@ -374,12 +374,12 @@ class IntegrationTester:
         
         try:
             # Run all test suites
-            self.test_results['architecture'] = self.test_model_architecture()
-            self.test_results['training'] = self.test_training_integration()
-            self.test_results['checkpointing'] = self.test_checkpointing_system()
-            self.test_results['evaluation'] = self.test_evaluation_system()
-            self.test_results['data_integration'] = self.test_data_integration()
-            self.test_results['convergence'] = self.test_convergence_behavior()
+            self.test_results['architecture'] = self.check_model_architecture()
+            self.test_results['training'] = self.check_training_integration()
+            self.test_results['checkpointing'] = self.check_checkpointing_system()
+            self.test_results['evaluation'] = self.check_evaluation_system()
+            self.test_results['data_integration'] = self.check_data_integration()
+            self.test_results['convergence'] = self.check_convergence_behavior()
             
             # Compile overall results
             overall_results = self.compile_test_summary()
