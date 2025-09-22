@@ -24,8 +24,8 @@ import os
 from datetime import datetime
 import warnings
 
-from ..model import MNISTAutoencoder
-from ..mnist_data import MNISTReader
+from autoencoder.model import MNISTAutoencoder
+from autoencoder.mnist_data import MNISTReader
 
 
 class EvaluationMetrics:
@@ -534,7 +534,7 @@ def evaluate_model_checkpoint(checkpoint_path: str, test_data: torch.Tensor,
     
     # Load model from checkpoint
     try:
-        from ..utils.checkpointing import CheckpointManager
+        from autoencoder.utils.checkpointing import CheckpointManager
         manager = CheckpointManager()
         checkpoint_data, model = manager.load_checkpoint(checkpoint_path)
         print(f"Loaded model from epoch {checkpoint_data['epoch']} with loss {checkpoint_data['loss']:.8f}")

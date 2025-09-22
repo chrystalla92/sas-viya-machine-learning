@@ -22,7 +22,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime
 import warnings
 
-from ..model import MNISTAutoencoder
+from autoencoder.model import MNISTAutoencoder
 
 
 class CheckpointManager:
@@ -450,7 +450,7 @@ def demo_checkpointing():
     manager = CheckpointManager('./demo_checkpoints')
     
     # Create mock model and optimizer
-    from ..model import create_sas_compatible_autoencoder
+    from autoencoder.model import create_sas_compatible_autoencoder
     import torch.optim as optim
     
     model = create_sas_compatible_autoencoder()
