@@ -26,9 +26,9 @@ from typing import Dict, List, Tuple, Optional, Callable, Any
 from datetime import datetime
 import warnings
 
-from ..model import MNISTAutoencoder, create_sas_compatible_autoencoder
-from ..mnist_data import load_mnist_data, MNISTReader
-from ..data_utils import train_validation_split, create_batches
+from autoencoder.model import MNISTAutoencoder, create_sas_compatible_autoencoder
+from autoencoder.mnist_data import load_mnist_data, MNISTReader
+from autoencoder.data_utils import train_validation_split, create_batches
 
 
 class TrainingConfig:
@@ -82,7 +82,7 @@ class AutoencoderTrainer:
         
         # Import metrics after module structure is established
         try:
-            from ..utils.metrics import TrainingMetrics
+            from autoencoder.utils.metrics import TrainingMetrics
             self.metrics = TrainingMetrics()
         except ImportError:
             # Fallback to basic metrics tracking
@@ -379,7 +379,7 @@ class AutoencoderTrainer:
     def save_checkpoint(self, epoch: int, loss: float, is_best: bool = False):
         """Save model checkpoint using checkpoint manager if available."""
         try:
-            from ..utils.checkpointing import CheckpointManager
+            from autoencoder.utils.checkpointing import CheckpointManager
             if not hasattr(self, 'checkpoint_manager'):
                 self.checkpoint_manager = CheckpointManager(self.config.checkpoint_dir)
             
