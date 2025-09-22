@@ -12,6 +12,7 @@ import torch
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend for testing
 import matplotlib.pyplot as plt
+import pytest
 
 # Add current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -40,7 +41,8 @@ def test_imports():
         print(f"✗ Error checking module availability: {e}")
         return False
 
-def create_test_data():
+@pytest.fixture
+def test_data():
     """Create simple test data."""
     print("Creating test data...")
     
