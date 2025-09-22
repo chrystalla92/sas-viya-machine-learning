@@ -117,7 +117,14 @@ def test_lbfgs_training():
     # Verify training results
     assert len(metrics.train_losses) > 0, "Should have training losses"
     assert metrics.train_losses[-1] < metrics.train_losses[0], "Loss should decrease"
-    assert metrics.best_loss <= min(metrics.train_losses), "Best loss should be minimum"
+    
+    # Check best_loss based on whether validation data was used
+    if metrics.val_losses:
+        # When validation is used, best_loss should track validation loss
+        assert metrics.best_loss <= min(metrics.val_losses), "Best loss should be minimum validation loss"
+    else:
+        # When only training data is used, best_loss should track training loss
+        assert metrics.best_loss <= min(metrics.train_losses), "Best loss should be minimum training loss"
     
     # Verify L-BFGS specific tracking
     if hasattr(trainer, 'gradient_norms'):
