@@ -31,6 +31,8 @@ try:
     _plots_available = True
 except ImportError as e:
     print(f"Warning: Could not import plots module: {e}")
+    import traceback
+    traceback.print_exc()
     _plots_available = False
 
 try:
@@ -45,6 +47,8 @@ try:
     _training_plots_available = True
 except ImportError as e:
     print(f"Warning: Could not import training_plots module: {e}")
+    import traceback
+    traceback.print_exc()
     _training_plots_available = False
 
 try:
@@ -60,6 +64,8 @@ try:
     _analysis_available = True
 except ImportError as e:
     print(f"Warning: Could not import analysis module: {e}")
+    import traceback
+    traceback.print_exc()
     _analysis_available = False
 
 # Define __all__ based on what's available
@@ -101,7 +107,7 @@ __author__ = "MNIST Autoencoder Project"
 __description__ = "Comprehensive visualization toolkit for MNIST autoencoder analysis"
 
 # Convenience function to check what's available
-def check_available_modules():
+def check_available_modules(verbose=True):
     """Check which visualization modules are available."""
     status = {
         'plots': _plots_available,
@@ -109,10 +115,11 @@ def check_available_modules():
         'analysis': _analysis_available
     }
     
-    print("Visualization Module Status:")
-    for module, available in status.items():
-        status_str = "✓ Available" if available else "✗ Not Available"
-        print(f"  {module}: {status_str}")
+    if verbose:
+        print("Visualization Module Status:")
+        for module, available in status.items():
+            status_str = "✓ Available" if available else "✗ Not Available"
+            print(f"  {module}: {status_str}")
     
     return status
 

@@ -15,21 +15,53 @@ import seaborn as sns
 import numpy as np
 import torch
 import torch.nn.functional as F
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
+# Try importing scikit-learn with fallback
+try:
+    from sklearn.manifold import TSNE
+    from sklearn.decomposition import PCA
+    _sklearn_available = True
+except ImportError:
+    print("Warning: scikit-learn not available. Some analysis functions will be limited.")
+    _sklearn_available = False
+    # Create dummy classes to prevent import errors
+    class TSNE:
+        def __init__(self, *args, **kwargs):
+            raise ImportError("scikit-learn is required for t-SNE visualization")
+        def fit_transform(self, *args, **kwargs):
+            raise ImportError("scikit-learn is required for t-SNE visualization")
+    
+    class PCA:
+        def __init__(self, *args, **kwargs):
+            raise ImportError("scikit-learn is required for PCA visualization")
+        def fit_transform(self, *args, **kwargs):
+            raise ImportError("scikit-learn is required for PCA visualization")
+        @property
+        def explained_variance_ratio_(self):
+            raise ImportError("scikit-learn is required for PCA visualization")
 from pathlib import Path
 from typing import Tuple, Optional, Union, List, Dict, Any
 import warnings
 
-# Import utilities
+# Import utilities with fallback  
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.plot_utils import (
-    create_figure_and_axes, format_axis, save_figure, tensor_to_numpy,
-    normalize_for_display, COLORS, COLORMAP_OPTIONS, PlotManager,
-    apply_tight_layout, add_colorbar
-)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+try:
+    from utils.plot_utils import (
+        create_figure_and_axes, format_axis, save_figure, tensor_to_numpy,
+        normalize_for_display, COLORS, COLORMAP_OPTIONS, PlotManager,
+        apply_tight_layout, add_colorbar
+    )
+except ImportError:
+    # Fallback with relative import
+    from ..utils.plot_utils import (
+        create_figure_and_axes, format_axis, save_figure, tensor_to_numpy,
+        normalize_for_display, COLORS, COLORMAP_OPTIONS, PlotManager,
+        apply_tight_layout, add_colorbar
+    )
 
 
 def plot_latent_space_2d(hidden_representations: Union[torch.Tensor, np.ndarray],

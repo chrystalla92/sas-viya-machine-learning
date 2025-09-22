@@ -174,7 +174,14 @@ def test_utils_module():
     print("\nTesting utils module...")
     
     try:
-        from utils.plot_utils import setup_publication_style, COLORS
+        try:
+            from utils.plot_utils import setup_publication_style, COLORS
+        except ImportError:
+            # Try with relative import path for current directory structure
+            import sys
+            import os
+            sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+            from utils.plot_utils import setup_publication_style, COLORS
         
         # Test style setup
         setup_publication_style()

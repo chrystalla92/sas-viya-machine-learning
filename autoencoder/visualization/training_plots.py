@@ -23,10 +23,24 @@ import warnings
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.plot_utils import (
-    create_figure_and_axes, format_axis, save_figure, tensor_to_numpy,
-    COLORS, PlotManager, apply_tight_layout
-)
+# Import utilities with fallback  
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+try:
+    from utils.plot_utils import (
+        create_figure_and_axes, format_axis, save_figure, tensor_to_numpy,
+        COLORS, PlotManager, apply_tight_layout
+    )
+except ImportError:
+    # Fallback with relative import
+    from ..utils.plot_utils import (
+        create_figure_and_axes, format_axis, save_figure, tensor_to_numpy,
+        COLORS, PlotManager, apply_tight_layout
+    )
 
 
 def plot_training_curves(train_losses: List[float],
