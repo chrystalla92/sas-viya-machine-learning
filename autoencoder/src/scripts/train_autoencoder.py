@@ -96,8 +96,7 @@ def main():
     # Create checkpoint manager
     checkpoint_manager = create_checkpoint_manager(
         args.checkpoint_dir,
-        max_checkpoints=5,
-        save_best=True
+        max_checkpoints=5
     )
     
     # Create trainer
