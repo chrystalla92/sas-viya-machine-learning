@@ -24,21 +24,48 @@ from .metrics import (
 )
 
 # Import utility functions
-from ..utils.checkpoints import (
-    CheckpointManager,
-    create_checkpoint_manager,
-    save_training_state,
-    load_training_state
-)
-
-from ..utils.visualization import (
-    plot_training_progress,
-    plot_reconstruction_comparison,
-    plot_latent_space,
-    plot_model_architecture,
-    plot_metrics_dashboard,
-    create_training_report
-)
+try:
+    # Try relative imports first (when installed as package)
+    from ..utils.checkpoints import (
+        CheckpointManager,
+        create_checkpoint_manager,
+        save_training_state,
+        load_training_state
+    )
+    
+    from ..utils.visualization import (
+        plot_training_progress,
+        plot_reconstruction_comparison,
+        plot_latent_space,
+        plot_model_architecture,
+        plot_metrics_dashboard,
+        create_training_report
+    )
+except ImportError:
+    # Fallback to absolute imports (when imported directly)
+    try:
+        from utils.checkpoints import (
+            CheckpointManager,
+            create_checkpoint_manager,
+            save_training_state,
+            load_training_state
+        )
+        
+        from utils.visualization import (
+            plot_training_progress,
+            plot_reconstruction_comparison,
+            plot_latent_space,
+            plot_model_architecture,
+            plot_metrics_dashboard,
+            create_training_report
+        )
+    except ImportError as e:
+        # If both fail, provide informative error message
+        raise ImportError(
+            "Could not import utils modules. Make sure the utils package is available "
+            "either as a sibling module (utils) or as a parent relative import (..utils). "
+            f"Original error: {e}"
+        )
 
 # Training configuration constants matching SAS specifications
 DEFAULT_CONFIG = {
