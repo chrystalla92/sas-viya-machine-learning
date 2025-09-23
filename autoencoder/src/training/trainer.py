@@ -16,9 +16,19 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple, Any, Callable
 from pathlib import Path
 import json
+import sys
 
-from ..models.autoencoder import Autoencoder
-from .metrics import TrainingMetrics
+# Handle imports for both package and standalone execution
+try:
+    # Try relative imports first (when run as package)
+    from ..models.autoencoder import Autoencoder
+    from .metrics import TrainingMetrics
+except ImportError:
+    # Fall back to absolute imports (when run as standalone script)
+    # Add parent directory to path to find modules
+    sys.path.append(str(Path(__file__).parent.parent))
+    from models.autoencoder import Autoencoder
+    from training.metrics import TrainingMetrics
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
