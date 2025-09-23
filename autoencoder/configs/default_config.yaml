@@ -1,0 +1,53 @@
+# Default configuration for SAS Viya Autoencoder
+
+# Model Configuration
+model:
+  type: "vanilla"  # Options: vanilla, convolutional, variational
+  input_dim: 784   # For MNIST: 28*28=784
+  hidden_dims: [256, 128, 64]  # Hidden layer dimensions
+  latent_dim: 32   # Latent space dimensionality
+  activation: "relu"  # Activation function
+  dropout: 0.2     # Dropout rate
+
+# Training Configuration  
+training:
+  batch_size: 128
+  num_epochs: 100
+  learning_rate: 0.001
+  weight_decay: 1e-4
+  scheduler: "step"  # Learning rate scheduler
+  scheduler_step_size: 30
+  scheduler_gamma: 0.1
+
+# Data Configuration
+data:
+  dataset: "mnist"  # Dataset name
+  data_dir: "./data"  # Data directory
+  num_workers: 4   # DataLoader workers
+  pin_memory: true # Pin memory for GPU
+  train_split: 0.8 # Training split ratio
+  val_split: 0.1   # Validation split ratio
+  test_split: 0.1  # Test split ratio
+
+# Device Configuration
+device:
+  use_cuda: true   # Use CUDA if available
+  gpu_id: 0        # GPU ID to use
+
+# Logging and Checkpoints
+logging:
+  log_level: "INFO"
+  log_dir: "./models/logs"
+  checkpoint_dir: "./models/checkpoints"
+  save_freq: 10    # Save checkpoint every N epochs
+  print_freq: 100  # Print loss every N batches
+
+# Evaluation Configuration
+evaluation:
+  metrics: ["mse", "mae", "ssim"]
+  save_reconstructions: true
+  num_samples: 16  # Number of samples to visualize
+
+# Reproducibility
+seed: 42
+deterministic: false  # Use deterministic algorithms (slower but reproducible)

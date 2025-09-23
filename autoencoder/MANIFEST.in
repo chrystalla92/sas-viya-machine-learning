@@ -1,0 +1,28 @@
+# Include important documentation and configuration files
+include README.md
+include LICENSE
+include requirements.txt
+include .gitignore
+include MANIFEST.in
+include verify_setup.py
+
+# Include all README files
+recursive-include . README.md
+
+# Include configuration files
+recursive-include configs *.yaml *.yml *.json
+
+# Include test files
+recursive-include tests *.py
+
+# Include scripts
+recursive-include scripts *.py *.sh
+
+# Exclude compiled and cache files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *.pyd
+global-exclude __pycache__
+global-exclude *.so
+global-exclude .DS_Store
+global-exclude *.egg-info
